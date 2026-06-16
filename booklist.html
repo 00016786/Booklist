@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Book Wish List</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --border: #E2DDD6;
+    --border-strong: #C8C2B8;
+    --text: #1A1814;
+    --muted: #7A7368;
+    --accent: #2E5FA3;
+    --accent-light: #E8EFF9;
+    --danger: #B83232;
+    --danger-light: #FAEAEA;
+    --success: #2A7A4B;
+    --success-light: #E6F4EC;
+    --amber: #8C5E0A;
+    --amber-light: #FDF3E0;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.07), 0 1px 2px rgba(0,0,0,0.04);
+  }
+
+  body {
+    font-family: 'Georgia', serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 4rem;
+  }
+
+  header {
+    background: var(--text);
+    color: #F7F5F0;
+    padding: 2rem 1.5rem 1.5rem;
+    text-align: center;
+  }
+  header h1 {
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-weight: normal;
+    letter-spacing: 0.02em;
+  }
+  header p {
+    font-size: 0.88rem;
+    opacity: 0.6;
+    margin-top: 0.35rem;
+    font-style: italic;
+    font-family: 'Georgia', serif;
+  }
+
+  .container { max-width: 860px; margin: 0 auto; padding: 1.5rem 1rem; }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 1.25rem;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 0.75rem 1rem;
+    text-align: center;
+  }
+  .stat-card strong { display: block; font-size: 1.6rem; font-weight: normal; font-family: 'Georgia', serif; }
+  .stat-card span { font-size: 0.75rem; color: var(--muted); font-family: system-ui, sans-serif; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  .toolbar {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+  .toolbar input[type="text"] {
+    flex: 1;
+    min-width: 160px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.9rem;
+    font-family: system-ui, sans-serif;
+    background: var(--surface);
+    color: var(--text);
+    outline: none;
+  }
+  .toolbar input[type="text"]:focus { border-color: var(--accent); }
+
+  button {
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.85rem;
+    font-family: system-ui, sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.12s;
+  }
+  button:hover { background: var(--bg); }
+  button.primary { background: var(--text); color: #F7F5F0; border-color: var(--text); }
+  button.primary:hover { background: #333; }
+  button.danger { color: var(--danger); border-color: var(--border); }
+  button.danger:hover { background: var(--danger-light); }
+  button.success { color: var(--success); border-color: var(--border); }
+  button.success:hover { background: var(--success-light); }
+
+  .filter-bar {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+  }
+  .filter-btn {
+    font-size: 0.78rem;
+    padding: 3px 10px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    font-family: system-ui, sans-serif;
+    transition: all 0.12s;
+  }
+  .filter-btn:hover { border-color: var(--border-strong); }
+  .filter-btn.active { background: var(--text); color: #F7F5F0; border-color: var(--text); }
+
+  .add-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.25rem;
+    margin-bottom: 1.25rem;
+    display: none;
+  }
+  .add-form.open { display: block; }
+  .add-form h3 { font-size: 0.9rem; font-weight: normal; margin-bottom: 0.85rem; color: var(--muted); font-family: system-ui, sans-serif; letter-spacing: 0.03em; text-transform: uppercase; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+  .form-grid input, .form-grid select, .form-grid textarea {
+    width: 100%;
+    padding: 0.45rem 0.7rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    font-size: 0.88rem;
+    font-family: system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+  }
+  .form-grid input:focus, .form-grid select:focus { border-color: var(--accent); background: var(--surface); }
+  .form-grid .full { grid-column: 1 / -1; }
+  .form-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  .book-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .book-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    transition: border-color 0.15s;
+    box-shadow: var(--shadow);
+  }
+  .book-card:hover { border-color: var(--border-strong); }
+  .book-card.done { opacity: 0.48; }
+
+  .book-spine {
+    width: 6px;
+    min-height: 60px;
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .book-info { flex: 1; min-width: 0; }
+  .book-title-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 3px; }
+  .book-title { font-size: 1rem; font-family: 'Georgia', serif; font-weight: normal; }
+  .book-card.done .book-title { text-decoration: line-through; color: var(--muted); }
+  .book-author { font-size: 0.82rem; color: var(--muted); font-style: italic; }
+  .book-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+  .badge {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-family: system-ui, sans-serif;
+    letter-spacing: 0.02em;
+    font-weight: 500;
+  }
+  .lang-badge { background: var(--accent-light); color: var(--accent); }
+  .priority-label { font-size: 0.75rem; color: var(--muted); font-family: system-ui, sans-serif; }
+  .book-note { font-size: 0.8rem; color: var(--muted); margin-top: 5px; font-style: italic; line-height: 1.5; }
+
+  .book-actions { display: flex; flex-direction: column; gap: 5px; flex-shrink: 0; }
+  .book-actions button { padding: 4px 10px; font-size: 0.78rem; }
+
+  .empty-state { text-align: center; padding: 3rem 1rem; color: var(--muted); font-family: system-ui, sans-serif; }
+  .empty-state .icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+  .empty-state p { font-size: 0.9rem; }
+
+  .random-banner {
+    background: var(--amber-light);
+    border: 1px solid #E8C97A;
+    border-radius: var(--radius);
+    padding: 0.9rem 1.25rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.9rem;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    font-family: system-ui, sans-serif;
+  }
+  .random-banner.show { display: flex; }
+  .random-banner strong { color: var(--amber); }
+  .random-banner button { margin-left: auto; }
+
+  @media (max-width: 520px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .book-actions { flex-direction: row; }
+    .stats-row { grid-template-columns: repeat(3, 1fr); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📚 My Book Wish List</h1>
+  <p>Track every recommendation, read at your own pace</p>
+</header>
+
+<div class="container">
+
+  <div class="stats-row" id="stats-row"></div>
+
+  <div class="random-banner" id="random-banner">
+    <span>🎲 Next read suggestion: <strong id="random-title"></strong></span>
+    <button onclick="closeRandom()">✕</button>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="search" placeholder="Search by title or author…" oninput="render()">
+    <button onclick="toggleForm()" id="add-btn">+ Add book</button>
+    <button onclick="pickRandom()">🎲 Pick for me</button>
+  </div>
+
+  <div class="filter-bar" id="filter-bar"></div>
+
+  <div class="add-form" id="add-form">
+    <h3>New book</h3>
+    <div class="form-grid">
+      <input type="text" id="f-title" placeholder="Title *">
+      <input type="text" id="f-author" placeholder="Author">
+      <select id="f-genre">
+        <option value="">Genre</option>
+        <option>Fiction</option><option>Non-fiction</option><option>Mystery</option>
+        <option>Science Fiction</option><option>Fantasy</option><option>Biography</option>
+        <option>Self-help</option><option>History</option><option>Romance</option><option>Other</option>
+      </select>
+      <select id="f-lang">
+        <option value="">Reading language</option>
+        <option>English</option><option>Uzbek</option><option>Russian</option><option>Other</option>
+      </select>
+      <select id="f-priority">
+        <option value="3">⭐⭐⭐ High priority</option>
+        <option value="2" selected>⭐⭐ Medium priority</option>
+        <option value="1">⭐ Low priority</option>
+      </select>
+      <input type="text" id="f-pages" placeholder="Pages (optional)">
+      <input type="text" id="f-note" placeholder="Why I want to read this…" class="full">
+    </div>
+    <div class="form-actions">
+      <button onclick="toggleForm()">Cancel</button>
+      <button class="primary" onclick="addBook()">Save book</button>
+    </div>
+  </div>
+
+  <div class="book-list" id="book-list"></div>
+
+</div>
+
+<script>
+const GENRE_COLORS = {
+  'Fiction': '#2E5FA3', 'Non-fiction': '#2A7A4B', 'Mystery': '#7A4F1A',
+  'Science Fiction': '#5B3FA3', 'Fantasy': '#A3306B', 'Biography': '#1A7A7A',
+  'Self-help': '#B83232', 'History': '#5A5550', 'Romance': '#A33045', 'Other': '#7A7368'
+};
+
+let books = JSON.parse(localStorage.getItem('elnora_books') || 'null') || [
+  { id:1, title:'Atomic Habits', author:'James Clear', genre:'Self-help', lang:'English', priority:3, pages:320, note:'Everyone recommends this for building good systems.', done:false },
+  { id:2, title:'The Alchemist', author:'Paulo Coelho', genre:'Fiction', lang:'English', priority:2, pages:208, note:'', done:false },
+  { id:3, title:'Sapiens', author:'Yuval Noah Harari', genre:'History', lang:'English', priority:3, pages:443, note:'Big picture of human history.', done:false },
+];
+let nextId = Math.max(...books.map(b=>b.id), 0) + 1;
+let filterGenre = 'All';
+
+function save() { localStorage.setItem('elnora_books', JSON.stringify(books)); }
+
+function toggleForm() {
+  const f = document.getElementById('add-form');
+  f.classList.toggle('open');
+  if (f.classList.contains('open')) document.getElementById('f-title').focus();
+}
+
+function addBook() {
+  const title = document.getElementById('f-title').value.trim();
+  if (!title) { document.getElementById('f-title').focus(); return; }
+  books.push({
+    id: nextId++,
+    title,
+    author: document.getElementById('f-author').value.trim(),
+    genre: document.getElementById('f-genre').value || 'Other',
+    lang: document.getElementById('f-lang').value || '',
+    priority: parseInt(document.getElementById('f-priority').value),
+    pages: document.getElementById('f-pages').value.trim(),
+    note: document.getElementById('f-note').value.trim(),
+    done: false
+  });
+  ['f-title','f-author','f-note','f-pages'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('f-genre').value = '';
+  document.getElementById('f-lang').value = '';
+  document.getElementById('f-priority').value = '2';
+  document.getElementById('add-form').classList.remove('open');
+  save(); render();
+}
+
+function toggleDone(id) {
+  const b = books.find(x=>x.id===id);
+  if (b) { b.done = !b.done; save(); render(); }
+}
+
+function removeBook(id) {
+  if (!confirm('Remove this book?')) return;
+  books = books.filter(x=>x.id!==id);
+  save(); render();
+}
+
+function pickRandom() {
+  const unread = books.filter(b=>!b.done);
+  if (!unread.length) { alert('No unread books — add more first!'); return; }
+  const weighted = [];
+  unread.forEach(b => { for(let i=0;i<b.priority;i++) weighted.push(b); });
+  const pick = weighted[Math.floor(Math.random()*weighted.length)];
+  document.getElementById('random-title').textContent = pick.title + (pick.author ? ' by ' + pick.author : '');
+  document.getElementById('random-banner').classList.add('show');
+}
+
+function closeRandom() {
+  document.getElementById('random-banner').classList.remove('show');
+}
+
+function stars(n) { return ['','⭐','⭐⭐','⭐⭐⭐'][n] || ''; }
+
+function render() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const genres = ['All', ...new Set(books.map(b=>b.genre).sort())];
+
+  document.getElementById('filter-bar').innerHTML = genres.map(g =>
+    `<button class="filter-btn${filterGenre===g?' active':''}" onclick="filterGenre='${g}';render()">${g}</button>`
+  ).join('');
+
+  let visible = books.filter(b => {
+    const mQ = !q || b.title.toLowerCase().includes(q) || (b.author||'').toLowerCase().includes(q);
+    const mG = filterGenre==='All' || b.genre===filterGenre;
+    return mQ && mG;
+  });
+  visible.sort((a,b) => a.done-b.done || b.priority-a.priority || a.title.localeCompare(b.title));
+
+  const total = books.length;
+  const done = books.filter(b=>b.done).length;
+  const high = books.filter(b=>b.priority===3&&!b.done).length;
+  document.getElementById('stats-row').innerHTML = `
+    <div class="stat-card"><strong>${total}</strong><span>Total</span></div>
+    <div class="stat-card"><strong>${total-done}</strong><span>To read</span></div>
+    <div class="stat-card"><strong>${done}</strong><span>Finished</span></div>
+  `;
+
+  const list = document.getElementById('book-list');
+  if (!visible.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">📖</div><p>No books here yet.<br>Add your first recommendation above!</p></div>`;
+    return;
+  }
+
+  list.innerHTML = visible.map(b => {
+    const color = GENRE_COLORS[b.genre] || GENRE_COLORS['Other'];
+    return `<div class="book-card${b.done?' done':''}">
+      <div class="book-spine" style="background:${color}"></div>
+      <div class="book-info">
+        <div class="book-title-row">
+          <span class="book-title">${b.title}</span>
+        </div>
+        ${b.author ? `<div class="book-author">by ${b.author}</div>` : ''}
+        <div class="book-meta">
+          <span class="badge" style="background:${color}18;color:${color}">${b.genre}</span>
+          ${b.lang ? `<span class="badge lang-badge">${b.lang}</span>` : ''}
+          <span class="priority-label">${stars(b.priority)}</span>
+          ${b.pages ? `<span class="priority-label">${b.pages} pages</span>` : ''}
+        </div>
+        ${b.note ? `<div class="book-note">"${b.note}"</div>` : ''}
+      </div>
+      <div class="book-actions">
+        <button class="${b.done?'':'success'}" onclick="toggleDone(${b.id})">${b.done ? '↩ Unread' : '✓ Done'}</button>
+        <button class="danger" onclick="removeBook(${b.id})">Remove</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+render();
+</script>
+</body>
+</html>
